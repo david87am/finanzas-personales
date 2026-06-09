@@ -390,6 +390,8 @@ tbody tr:hover .row-actions{opacity:1}
 }
 .type-btn.active.gasto{background:var(--surface);color:var(--red);box-shadow:var(--shadow)}
 .type-btn.active.ingreso{background:var(--surface);color:var(--green);box-shadow:var(--shadow)}
+.type-btn.active.cuota{background:var(--surface);color:var(--blue);box-shadow:var(--shadow)}
+.type-btn.active.deuda{background:var(--surface);color:var(--yellow);box-shadow:var(--shadow)}
 .monto-wrap{
   display:flex;align-items:center;justify-content:center;gap:.4rem;
   padding:1.75rem 1.5rem;
@@ -454,7 +456,7 @@ tbody tr:hover .row-actions{opacity:1}
   .form-row-2{grid-template-columns:1fr}
   .cols2{grid-template-columns:1fr}
   .cols4{grid-template-columns:1fr 1fr}
-  .type-btn{padding:.4rem 1.2rem}
+  .type-btn{padding:.4rem .75rem;font-size:.78rem}
   .monto-input{font-size:2.2rem}
 }
 </style>
@@ -499,40 +501,88 @@ tbody tr:hover .row-actions{opacity:1}
         <div class="cargar-wrap">
           <div class="type-toggle" id="type-toggle">
             <button class="type-btn active gasto" id="btn-gasto" onclick="setCargarTipo('Gasto')">Gasto</button>
-            <button class="type-btn ingreso" id="btn-ingreso" onclick="setCargarTipo('Ingreso')">Ingreso</button>
+            <button class="type-btn" id="btn-ingreso" onclick="setCargarTipo('Ingreso')">Ingreso</button>
+            <button class="type-btn" id="btn-cuota" onclick="setCargarTipo('Cuota')">Cuota</button>
+            <button class="type-btn" id="btn-deuda" onclick="setCargarTipo('Deuda')">Deuda</button>
           </div>
           <div class="monto-wrap">
             <span class="monto-symbol" id="monto-symbol">$</span>
             <input type="number" class="monto-input" id="cargar-monto" placeholder="0" min="0" step="0.01" inputmode="decimal"/>
           </div>
           <div class="cargar-form">
-            <div class="form-grid">
-              <div class="form-row-2">
-                <div class="field"><label>Categoría</label><select id="cargar-cat" onchange="updateSubcat('cargar-cat','cargar-subcat')"></select></div>
-                <div class="field"><label>Subcategoría</label><select id="cargar-subcat"></select></div>
-              </div>
-              <div class="form-row-2">
-                <div class="field">
-                  <label>Moneda</label>
-                  <select id="cargar-moneda" onchange="updateMonedaSymbol()">
-                    <option value="ARS">ARS $</option><option value="USD">USD $</option>
-                  </select>
+            <!-- GASTO / INGRESO -->
+            <div id="fields-trans">
+              <div class="form-grid">
+                <div class="form-row-2">
+                  <div class="field"><label>Categoría</label><select id="cargar-cat" onchange="updateSubcat('cargar-cat','cargar-subcat')"></select></div>
+                  <div class="field"><label>Subcategoría</label><select id="cargar-subcat"></select></div>
                 </div>
-                <div class="field"><label>Fecha</label><input type="date" id="cargar-fecha"/></div>
-              </div>
-              <div class="form-row-2">
-                <div class="field">
-                  <label>Método de pago</label>
-                  <select id="cargar-metodo">
-                    <option>Efectivo</option><option>Débito</option><option>Crédito</option>
-                    <option>Transferencia</option><option>Billetera virtual</option>
-                  </select>
+                <div class="form-row-2">
+                  <div class="field"><label>Moneda</label>
+                    <select id="cargar-moneda" onchange="updateMonedaSymbol()">
+                      <option value="ARS">ARS $</option><option value="USD">USD $</option>
+                    </select>
+                  </div>
+                  <div class="field"><label>Fecha</label><input type="date" id="cargar-fecha"/></div>
                 </div>
-                <div class="field"><label>Descripción</label><input type="text" id="cargar-desc" placeholder="Ej: Carrefour, sueldo…"/></div>
+                <div class="form-row-2">
+                  <div class="field"><label>Método de pago</label>
+                    <select id="cargar-metodo">
+                      <option>Efectivo</option><option>Débito</option><option>Crédito</option>
+                      <option>Transferencia</option><option>Billetera virtual</option>
+                    </select>
+                  </div>
+                  <div class="field"><label>Descripción</label><input type="text" id="cargar-desc" placeholder="Ej: Carrefour, sueldo…"/></div>
+                </div>
+                <div class="field"><label>Notas <small style="color:var(--text3)">(opcional)</small></label><input type="text" id="cargar-notas"/></div>
               </div>
-              <div class="field"><label>Notas <small style="color:var(--text3)">(opcional)</small></label><input type="text" id="cargar-notas" placeholder=""/></div>
-              <button class="btn btn-primary btn-cargar" id="btn-cargar" onclick="saveCargar()">Guardar movimiento</button>
             </div>
+            <!-- CUOTA -->
+            <div id="fields-cuota" style="display:none">
+              <div class="form-grid">
+                <div class="field"><label>Descripción</label><input type="text" id="cargar-cuota-desc" placeholder="Ej: Smart TV Samsung"/></div>
+                <div class="form-row-2">
+                  <div class="field"><label>Categoría</label><select id="cargar-cuota-cat"></select></div>
+                  <div class="field"><label>Moneda</label>
+                    <select id="cargar-cuota-moneda" onchange="updateMonedaSymbol()">
+                      <option value="ARS">ARS $</option><option value="USD">USD $</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="field"><label>Total de cuotas</label><input type="number" id="cargar-cuota-total" placeholder="12" min="1"/></div>
+                  <div class="field"><label>Cuota Nº actual</label><input type="number" id="cargar-cuota-num" placeholder="1" min="1"/></div>
+                </div>
+                <div class="field"><label>Próximo vencimiento</label><input type="date" id="cargar-cuota-venc"/></div>
+                <div class="field"><label>Notas <small style="color:var(--text3)">(opcional)</small></label><input type="text" id="cargar-cuota-notas"/></div>
+              </div>
+            </div>
+            <!-- DEUDA -->
+            <div id="fields-deuda" style="display:none">
+              <div class="form-grid">
+                <div class="form-row-2">
+                  <div class="field"><label>Tipo</label>
+                    <select id="cargar-deuda-tipo">
+                      <option value="Debo yo">Debo yo</option><option value="Me deben">Me deben</option>
+                    </select>
+                  </div>
+                  <div class="field"><label>Moneda</label>
+                    <select id="cargar-deuda-moneda" onchange="updateMonedaSymbol()">
+                      <option value="ARS">ARS $</option><option value="USD">USD $</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field"><label>Descripción</label><input type="text" id="cargar-deuda-desc" placeholder="Ej: Préstamo banco"/></div>
+                <div class="field"><label>Acreedor / Deudor</label><input type="text" id="cargar-deuda-quien" placeholder="Nombre o entidad"/></div>
+                <div class="form-row-2">
+                  <div class="field"><label>Monto pagado</label><input type="number" id="cargar-deuda-pagado" placeholder="0" min="0" step="0.01"/></div>
+                  <div class="field"><label>Fecha inicio</label><input type="date" id="cargar-deuda-inicio"/></div>
+                </div>
+                <div class="field"><label>Fecha vencimiento <small style="color:var(--text3)">(opcional)</small></label><input type="date" id="cargar-deuda-venc"/></div>
+                <div class="field"><label>Notas <small style="color:var(--text3)">(opcional)</small></label><input type="text" id="cargar-deuda-notas"/></div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-cargar" id="btn-cargar" onclick="saveCargar()" style="margin-top:.75rem">Guardar gasto</button>
           </div>
         </div>
       </section>
@@ -586,18 +636,16 @@ tbody tr:hover .row-actions{opacity:1}
 
       <!-- DEUDAS -->
       <section class="page" id="page-deudas">
-        <div class="flex-between mb">
+        <div class="mb">
           <h1 class="page-title">Deudas</h1>
-          <button class="btn btn-primary btn-sm" onclick="openDeudaModal()">+ Agregar</button>
         </div>
         <div id="deudas-content"></div>
       </section>
 
       <!-- CUOTAS -->
       <section class="page" id="page-cuotas">
-        <div class="flex-between mb">
+        <div class="mb">
           <h1 class="page-title">Cuotas</h1>
-          <button class="btn btn-primary btn-sm" onclick="openCuotaModal()">+ Agregar</button>
         </div>
         <div id="cuotas-content"></div>
       </section>
@@ -1075,24 +1123,38 @@ async function updateSubcat(catId, subcatId) {
 
 // ─── CARGAR PAGE ──────────────────────────────────────────
 async function initCargar() {
-  document.getElementById('cargar-fecha').value = today();
+  document.getElementById('cargar-fecha').value       = today();
+  document.getElementById('cargar-deuda-inicio').value = today();
   await fillCatSelect('cargar-cat', 'Gasto');
   await updateSubcat('cargar-cat', 'cargar-subcat');
+  await fillCatSelect('cargar-cuota-cat');
 }
 
 async function setCargarTipo(tipo) {
   _cargarTipo = tipo;
-  document.getElementById('btn-gasto').classList.toggle('active', tipo === 'Gasto');
-  document.getElementById('btn-gasto').classList.toggle('gasto', tipo === 'Gasto');
-  document.getElementById('btn-ingreso').classList.toggle('active', tipo === 'Ingreso');
-  document.getElementById('btn-ingreso').classList.toggle('ingreso', tipo === 'Ingreso');
-  await fillCatSelect('cargar-cat', tipo);
-  await updateSubcat('cargar-cat', 'cargar-subcat');
+  const ids  = { Gasto:'btn-gasto', Ingreso:'btn-ingreso', Cuota:'btn-cuota', Deuda:'btn-deuda' };
+  const clss = { Gasto:'gasto', Ingreso:'ingreso', Cuota:'cuota', Deuda:'deuda' };
+  Object.keys(ids).forEach(t => {
+    document.getElementById(ids[t]).className =
+      'type-btn' + (t === tipo ? ` active ${clss[t]}` : '');
+  });
+  const isTrans = tipo === 'Gasto' || tipo === 'Ingreso';
+  document.getElementById('fields-trans').style.display = isTrans ? '' : 'none';
+  document.getElementById('fields-cuota').style.display = tipo === 'Cuota'  ? '' : 'none';
+  document.getElementById('fields-deuda').style.display = tipo === 'Deuda'  ? '' : 'none';
+  if (isTrans) {
+    await fillCatSelect('cargar-cat', tipo);
+    await updateSubcat('cargar-cat', 'cargar-subcat');
+  }
+  const labels = { Gasto:'Guardar gasto', Ingreso:'Guardar ingreso', Cuota:'Guardar cuota', Deuda:'Guardar deuda' };
+  document.getElementById('btn-cargar').textContent = labels[tipo];
+  updateMonedaSymbol();
 }
 
 function updateMonedaSymbol() {
-  document.getElementById('monto-symbol').textContent =
-    document.getElementById('cargar-moneda').value === 'USD' ? 'U$' : '$';
+  const selMap = { Gasto:'cargar-moneda', Ingreso:'cargar-moneda', Cuota:'cargar-cuota-moneda', Deuda:'cargar-deuda-moneda' };
+  const sel = document.getElementById(selMap[_cargarTipo] || 'cargar-moneda');
+  document.getElementById('monto-symbol').textContent = sel && sel.value === 'USD' ? 'U$' : '$';
 }
 
 async function loadSubcats() {
@@ -1103,34 +1165,92 @@ async function loadSubcats() {
 
 async function saveCargar() {
   const monto = parseFloat(document.getElementById('cargar-monto').value);
-  const desc  = document.getElementById('cargar-desc').value.trim();
   if (!monto || monto <= 0) { toast('Ingresá un monto válido', 'error'); return; }
-  if (!desc) { toast('Ingresá una descripción', 'error'); return; }
 
   const btn = document.getElementById('btn-cargar');
+  const origLabel = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Guardando…';
 
   try {
-    const r = await apiPost({
-      action: 'addTransaccion',
-      data: {
-        fecha:        document.getElementById('cargar-fecha').value,
-        tipo:         _cargarTipo,
-        categoria:    document.getElementById('cargar-cat').value,
-        subcategoria: document.getElementById('cargar-subcat').value,
-        descripcion:  desc,
-        moneda:       document.getElementById('cargar-moneda').value,
-        monto:        monto,
-        metodoPago:   document.getElementById('cargar-metodo').value,
-        notas:        document.getElementById('cargar-notas').value,
-      }
-    });
+    let payload;
+
+    if (_cargarTipo === 'Gasto' || _cargarTipo === 'Ingreso') {
+      const desc = document.getElementById('cargar-desc').value.trim();
+      if (!desc) { toast('Ingresá una descripción', 'error'); return; }
+      payload = {
+        action: 'addTransaccion',
+        data: {
+          fecha:        document.getElementById('cargar-fecha').value,
+          tipo:         _cargarTipo,
+          categoria:    document.getElementById('cargar-cat').value,
+          subcategoria: document.getElementById('cargar-subcat').value,
+          descripcion:  desc,
+          moneda:       document.getElementById('cargar-moneda').value,
+          monto,
+          metodoPago:   document.getElementById('cargar-metodo').value,
+          notas:        document.getElementById('cargar-notas').value,
+        }
+      };
+    } else if (_cargarTipo === 'Cuota') {
+      const desc       = document.getElementById('cargar-cuota-desc').value.trim();
+      const totalCuotas = parseInt(document.getElementById('cargar-cuota-total').value) || 0;
+      const cuotaNum   = parseInt(document.getElementById('cargar-cuota-num').value) || 1;
+      if (!desc) { toast('Ingresá una descripción', 'error'); return; }
+      if (totalCuotas < 1) { toast('Ingresá el total de cuotas', 'error'); return; }
+      payload = {
+        action: 'addCuota',
+        data: {
+          descripcion:        desc,
+          categoria:          document.getElementById('cargar-cuota-cat').value,
+          moneda:             document.getElementById('cargar-cuota-moneda').value,
+          valorTotal:         monto * totalCuotas,
+          cuotaNum,
+          totalCuotas,
+          proximoVencimiento: document.getElementById('cargar-cuota-venc').value,
+          notas:              document.getElementById('cargar-cuota-notas').value,
+        }
+      };
+    } else if (_cargarTipo === 'Deuda') {
+      const desc = document.getElementById('cargar-deuda-desc').value.trim();
+      if (!desc) { toast('Ingresá una descripción', 'error'); return; }
+      payload = {
+        action: 'addDeuda',
+        data: {
+          tipo:          document.getElementById('cargar-deuda-tipo').value,
+          descripcion:   desc,
+          acreedorDeudor: document.getElementById('cargar-deuda-quien').value.trim(),
+          moneda:        document.getElementById('cargar-deuda-moneda').value,
+          montoOriginal: monto,
+          montoPagado:   parseFloat(document.getElementById('cargar-deuda-pagado').value) || 0,
+          fechaInicio:   document.getElementById('cargar-deuda-inicio').value,
+          fechaVencimiento: document.getElementById('cargar-deuda-venc').value,
+          notas:         document.getElementById('cargar-deuda-notas').value,
+        }
+      };
+    }
+
+    const r = await apiPost(payload);
     if (r.ok) {
       toast(`✓ ${_cargarTipo} guardado`);
       document.getElementById('cargar-monto').value = '';
-      document.getElementById('cargar-desc').value  = '';
-      document.getElementById('cargar-notas').value = '';
+      // limpiar campos según tipo
+      if (_cargarTipo === 'Gasto' || _cargarTipo === 'Ingreso') {
+        document.getElementById('cargar-desc').value  = '';
+        document.getElementById('cargar-notas').value = '';
+      } else if (_cargarTipo === 'Cuota') {
+        document.getElementById('cargar-cuota-desc').value  = '';
+        document.getElementById('cargar-cuota-notas').value = '';
+        document.getElementById('cargar-cuota-total').value = '';
+        document.getElementById('cargar-cuota-num').value   = '';
+        document.getElementById('cargar-cuota-venc').value  = '';
+      } else if (_cargarTipo === 'Deuda') {
+        document.getElementById('cargar-deuda-desc').value   = '';
+        document.getElementById('cargar-deuda-quien').value  = '';
+        document.getElementById('cargar-deuda-pagado').value = '';
+        document.getElementById('cargar-deuda-venc').value   = '';
+        document.getElementById('cargar-deuda-notas').value  = '';
+      }
     } else {
       toast(r.error || 'Error al guardar', 'error');
     }
@@ -1138,7 +1258,7 @@ async function saveCargar() {
     toast('Error de conexión', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Guardar movimiento';
+    btn.textContent = origLabel;
   }
 }
 
@@ -1379,14 +1499,6 @@ async function delTransaccion(id) {
 }
 
 // ─── DEUDAS ───────────────────────────────────────────────
-function openDeudaModal() {
-  document.getElementById('modal-deuda-title').textContent = 'Nueva Deuda';
-  document.getElementById('d-id').value = '';
-  ['d-desc','d-quien','d-notas'].forEach(id => document.getElementById(id).value = '');
-  ['d-original','d-pagado'].forEach(id => document.getElementById(id).value = '');
-  ['d-inicio','d-venc'].forEach(id => document.getElementById(id).value = '');
-  openModal('modal-deuda');
-}
 
 async function loadDeudas() {
   const el = document.getElementById('deudas-content');
@@ -1467,14 +1579,6 @@ async function delDeuda(id) {
 }
 
 // ─── CUOTAS ───────────────────────────────────────────────
-function openCuotaModal() {
-  document.getElementById('modal-cuota-title').textContent = 'Nueva Cuota';
-  document.getElementById('c-id').value = '';
-  ['c-desc','c-notas'].forEach(id => document.getElementById(id).value = '');
-  ['c-total','c-cuotas','c-num'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('c-venc').value = '';
-  openModal('modal-cuota');
-}
 
 async function loadCuotas() {
   const el = document.getElementById('cuotas-content');
@@ -1786,7 +1890,12 @@ async function loadConfig() {
       <div class="field"><label>Alerta presupuesto al (%)</label><input type="number" id="cfg-alerta" value="${Math.round((c['Alerta presupuesto al %']||0.8)*100)}" min="1" max="100"/></div>
     </div>
     <div class="mt"><button class="btn btn-primary" onclick="saveConfig()">Guardar cambios</button></div>
+  </div>
+  <div class="card" style="max-width:520px;margin-top:1.25rem">
+    <div class="section-label">Gestión de categorías</div>
+    <div id="cats-manager-body"></div>
   </div>`;
+  loadCatsManager();
 }
 
 async function saveConfig() {
@@ -1802,6 +1911,84 @@ async function saveConfig() {
   await apiPost({ action: 'updateConfig', data: updates });
   document.getElementById('tc-badge').textContent = `USD ${fmtARS(updates['Tipo de cambio USD→ARS'])}`;
   toast('✓ Configuración guardada');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadCatsManager() {
+  const body = document.getElementById('cats-manager-body');
+  if (!body) return;
+  body.innerHTML = '<div class="skel" style="height:2rem;border-radius:8px;margin-bottom:.5rem"></div>';
+  const r = await apiGet({ action: 'getCategorias' });
+  const cats = r.data || [];
+
+  let listHtml = '';
+  cats.forEach(c => {
+    const chips = c.subcategorias.map(s => `
+      <span style="display:inline-flex;align-items:center;gap:.25rem;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:.22rem .6rem;font-size:.8rem">
+        ${escHtml(s)}
+        <button data-cat="${escHtml(c.nombre)}" data-sub="${escHtml(s)}" onclick="delCategoriaItem(this)" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:.95rem;line-height:1;padding:0 0 0 .1rem" title="Eliminar">×</button>
+      </span>`).join('');
+    listHtml += `<div style="margin-bottom:.75rem">
+      <div class="section-label" style="margin-bottom:.35rem">${escHtml(c.nombre)} <small style="color:var(--text3);font-weight:400">${escHtml(c.tipo)}</small></div>
+      <div style="display:flex;flex-wrap:wrap;gap:.35rem">${chips}</div>
+    </div>`;
+  });
+
+  body.innerHTML = `
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end">
+      <div class="field" style="flex:1;min-width:120px"><label>Categoría</label><input type="text" id="new-cat-name" placeholder="Ej: Salud"/></div>
+      <div class="field" style="flex:1;min-width:120px"><label>Subcategoría</label><input type="text" id="new-cat-sub" placeholder="Ej: Farmacia"/></div>
+      <div class="field" style="min-width:90px"><label>Tipo</label>
+        <select id="new-cat-tipo"><option value="Gasto">Gasto</option><option value="Ingreso">Ingreso</option></select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCategoriaItem()" style="margin-top:auto">+ Agregar</button>
+    </div>
+    ${listHtml || '<p style="color:var(--text3);font-size:.88rem">No hay categorías activas.</p>'}`;
+}
+
+async function addCategoriaItem() {
+  const cat    = document.getElementById('new-cat-name').value.trim();
+  const subcat = document.getElementById('new-cat-sub').value.trim();
+  const tipo   = document.getElementById('new-cat-tipo').value;
+  if (!cat || !subcat) { toast('Completá categoría y subcategoría', 'error'); return; }
+  const r = await apiPost({ action: 'addCategoria', data: { categoria: cat, subcategoria: subcat, tipo } });
+  if (r.ok) {
+    _cats = null;
+    await getCats();
+    toast('✓ Categoría agregada');
+    loadCatsManager();
+    if (_cargarTipo === 'Gasto' || _cargarTipo === 'Ingreso') {
+      await fillCatSelect('cargar-cat', _cargarTipo);
+      await updateSubcat('cargar-cat', 'cargar-subcat');
+    }
+    await fillCatSelect('cargar-cuota-cat');
+  } else {
+    toast(r.error || 'Error al agregar', 'error');
+  }
+}
+
+async function delCategoriaItem(btn) {
+  const cat    = btn.dataset.cat;
+  const subcat = btn.dataset.sub;
+  const ok = await confirmDialog(`¿Eliminar "${subcat}" de "${cat}"?`);
+  if (!ok) return;
+  const r = await apiPost({ action: 'deleteCategoria', data: { categoria: cat, subcategoria: subcat } });
+  if (r.ok) {
+    _cats = null;
+    await getCats();
+    toast('✓ Eliminado');
+    loadCatsManager();
+    if (_cargarTipo === 'Gasto' || _cargarTipo === 'Ingreso') {
+      await fillCatSelect('cargar-cat', _cargarTipo);
+      await updateSubcat('cargar-cat', 'cargar-subcat');
+    }
+    await fillCatSelect('cargar-cuota-cat');
+  } else {
+    toast(r.error || 'Error al eliminar', 'error');
+  }
 }
 
 // ─── TEMA TOGGLE ──────────────────────────────────────────
